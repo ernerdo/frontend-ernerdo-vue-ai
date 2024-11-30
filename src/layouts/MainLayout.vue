@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+const authStore = useAuthStore()
+const router = useRouter()
+
+const logOut = () => {
+  authStore.logout()
+  router.push('/login')
+}
 const currentYear = new Date().getFullYear()
 </script>
 <template>
@@ -7,6 +16,7 @@ const currentYear = new Date().getFullYear()
       <nav>
         <RouterLink to="/home">Home</RouterLink>
         <RouterLink to="/login">Login</RouterLink>
+        <button @click="logOut()">Logout</button>
       </nav>
     </header>
     <main class="main-content">

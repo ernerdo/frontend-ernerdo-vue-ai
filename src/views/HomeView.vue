@@ -5,12 +5,4 @@
   </section>
 </template>
 
-<style scoped>
-h1 {
-  color: #007bff;
-}
-
-p {
-  font-size: 1.2rem;
-}
-</style>
+<style scoped></style>
