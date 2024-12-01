@@ -1,3 +1,40 @@
+<script setup lang="ts">
+import axios from 'axios'
+import { ref } from 'vue'
+const AI_API_URL = import.meta.env.VITE_AI_API_URL
+
+const input = ref('')
+const messages = ref<{ sender: string; text: string }[]>([])
+const loading = ref(false)
+
+const sendMessage = async () => {
+  if (!input.value.trim()) return
+
+  messages.value.push({ sender: 'user', text: input.value })
+
+  const userMessage = input.value
+  input.value = ''
+  loading.value = true
+
+  try {
+    const response = await axios.post(
+      `${AI_API_URL}/ask`,
+      { prompt: userMessage },
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+
+    messages.value.push({ sender: 'bot', text: response.data })
+  } catch (error) {
+    console.error(error)
+    messages.value.push({
+      sender: 'bot',
+      text: "Sorry, I couldn't process your request.",
+    })
+  } finally {
+    loading.value = false
+  }
+}
+</script>
 <template>
   <section class="chat-container">
     <div class="chat-box">
@@ -22,43 +59,6 @@
     </form>
   </section>
 </template>
-
-<script setup lang="ts">
-import axios from 'axios'
-import { ref } from 'vue'
-
-const input = ref('')
-const messages = ref<{ sender: string; text: string }[]>([])
-const loading = ref(false)
-
-const sendMessage = async () => {
-  if (!input.value.trim()) return
-
-  messages.value.push({ sender: 'user', text: input.value })
-
-  const userMessage = input.value
-  input.value = ''
-  loading.value = true
-
-  try {
-    const response = await axios.post(
-      'http://127.0.0.1:8000/ask',
-      { prompt: userMessage },
-      { headers: { 'Content-Type': 'application/json' } },
-    )
-
-    messages.value.push({ sender: 'bot', text: response.data })
-  } catch (error) {
-    console.error(error)
-    messages.value.push({
-      sender: 'bot',
-      text: "Sorry, I couldn't process your request.",
-    })
-  } finally {
-    loading.value = false
-  }
-}
-</script>
 
 <style scoped>
 .chat-container {
