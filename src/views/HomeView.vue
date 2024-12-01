@@ -45,15 +45,6 @@ const sendMessage = async () => {
       </div>
     </div>
     <form class="input-container" @submit.prevent="sendMessage">
-      <!-- <input
-        v-model="input"
-        type="text"
-        placeholder="Type your message..."
-        class="chat-input"
-        required
-        :disabled="loading"
-        maxlength="100"
-      /> -->
       <textarea
         v-model="input"
         placeholder="Type your message..."
