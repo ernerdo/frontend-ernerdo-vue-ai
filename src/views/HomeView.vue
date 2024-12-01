@@ -8,7 +8,7 @@ const messages = ref<{ sender: string; text: string }[]>([])
 const loading = ref(false)
 
 const sendMessage = async () => {
-  if (!input.value.trim()) return
+  if (!input.value.trim() || input.value.length > 100) return
 
   messages.value.push({ sender: 'user', text: input.value })
 
@@ -45,18 +45,28 @@ const sendMessage = async () => {
       </div>
     </div>
     <form class="input-container" @submit.prevent="sendMessage">
-      <input
+      <!-- <input
         v-model="input"
         type="text"
         placeholder="Type your message..."
         class="chat-input"
         required
         :disabled="loading"
-      />
+        maxlength="100"
+      /> -->
+      <textarea
+        v-model="input"
+        placeholder="Type your message..."
+        class="chat-textarea"
+        required
+        :disabled="loading"
+        maxlength="100"
+      ></textarea>
       <button type="submit" class="send-button" :disabled="loading">
         {{ loading ? 'Sending...' : 'Send' }}
       </button>
     </form>
+    <p class="char-counter">{{ input.length }}/100 characters</p>
   </section>
 </template>
 
@@ -75,7 +85,30 @@ const sendMessage = async () => {
   overflow: hidden;
 }
 
-/* Caja de mensajes */
+.chat-textarea {
+  flex-grow: 1;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 1rem;
+  resize: none;
+  height: 50px;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+.chat-textarea:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.char-counter {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
 .chat-box {
   flex-grow: 1;
   overflow-y: auto;
@@ -86,7 +119,6 @@ const sendMessage = async () => {
   border-radius: 8px;
 }
 
-/* Estilo de los mensajes */
 .message {
   margin-bottom: 1rem;
 }
