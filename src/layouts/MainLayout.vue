@@ -8,10 +8,9 @@ const logOut = () => {
   authStore.logout()
   router.push('/login')
 }
-const currentYear = new Date().getFullYear()
 </script>
 <template>
-  <div>
+  <div class="parent">
     <header class="main-header">
       <nav>
         <RouterLink to="/home">Home</RouterLink>
@@ -22,18 +21,23 @@ const currentYear = new Date().getFullYear()
     <main class="main-content">
       <RouterView />
     </main>
-    <footer class="main-footer">
-      <p>&copy; {{ currentYear }}</p>
-    </footer>
   </div>
 </template>
 
 <style scoped>
+.parent {
+  display: grid;
+  grid-template-areas: 'header' 'main';
+  grid-template-columns: 100%;
+  grid-template-rows: 50px 1fr;
+  height: 100vh;
+}
 .main-header {
+  grid-area: header;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #007bff;
+  background-color: #007bffe7;
   color: white;
   padding: 1rem;
 }
@@ -55,15 +59,9 @@ const currentYear = new Date().getFullYear()
 }
 
 .main-content {
-  min-height: 80vh;
-  padding: 2rem;
-  background-color: #f8f9fa;
-}
-
-.main-footer {
-  text-align: center;
+  grid-area: main;
+  height: 100%;
   padding: 1rem;
-  background-color: #343a40;
-  color: white;
+  background-color: #f8f9fa;
 }
 </style>
