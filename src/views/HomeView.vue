@@ -71,7 +71,6 @@ const sendMessage = async () => {
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background-color: #f9f9f9;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
