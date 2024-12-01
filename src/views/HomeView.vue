@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
 const input = ref('')
+const chatBox = ref<HTMLDivElement | null>(null)
 const messages = ref<{ sender: string; text: string }[]>([])
 const loading = ref(false)
 
@@ -16,6 +17,8 @@ const sendMessage = async () => {
   input.value = ''
   loading.value = true
 
+  await nextTick()
+  scrollToBottom()
   try {
     const response = await axios.post(
       `${AI_API_URL}/ask`,
@@ -24,20 +27,29 @@ const sendMessage = async () => {
     )
 
     messages.value.push({ sender: 'bot', text: response.data })
+    await nextTick()
+    scrollToBottom()
   } catch (error) {
     console.error(error)
     messages.value.push({
       sender: 'bot',
       text: "Sorry, I couldn't process your request.",
     })
+    await nextTick()
+    scrollToBottom()
   } finally {
     loading.value = false
+  }
+}
+const scrollToBottom = () => {
+  if (chatBox.value) {
+    chatBox.value.scrollTop = chatBox.value.scrollHeight
   }
 }
 </script>
 <template>
   <section class="chat-container">
-    <div class="chat-box">
+    <div class="chat-box" ref="chatBox">
       <div v-for="(message, index) in messages" :key="index" class="message">
         <div :class="['bubble', message.sender === 'user' ? 'user' : 'bot']">
           {{ message.text }}
@@ -108,6 +120,7 @@ const sendMessage = async () => {
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
+  scroll-behavior: smooth;
 }
 
 .message {
@@ -133,7 +146,6 @@ const sendMessage = async () => {
   align-self: flex-start;
 }
 
-/* Contenedor del input */
 .input-container {
   display: flex;
   gap: 0.5rem;
@@ -177,7 +189,6 @@ const sendMessage = async () => {
   cursor: not-allowed;
 }
 
-/* Diseño Responsivo */
 @media (max-width: 768px) {
   .chat-container {
     height: 90vh;
