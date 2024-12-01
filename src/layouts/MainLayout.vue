@@ -13,9 +13,7 @@ const logOut = () => {
   <div class="parent">
     <header class="main-header">
       <nav>
-        <RouterLink to="/home">Home</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <button @click="logOut()">Logout</button>
+        <button v-if="authStore.isAuthenticated()" @click="logOut">Logout</button>
       </nav>
     </header>
     <main class="main-content">
@@ -35,7 +33,7 @@ const logOut = () => {
 .main-header {
   grid-area: header;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   background-color: #007bffe7;
   color: white;
@@ -63,5 +61,33 @@ const logOut = () => {
   height: 100%;
   padding: 1rem;
   background-color: #f8f9fa;
+}
+
+.main-header nav button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.main-header nav button:hover {
+  background-color: #d9363e;
+  transform: translateY(-2px);
+}
+
+.main-header nav button:active {
+  transform: translateY(0);
+}
+
+.main-header nav button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 </style>

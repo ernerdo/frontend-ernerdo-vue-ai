@@ -39,9 +39,15 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       delete axios.defaults.headers.common['Authorization']
     },
-  },
+    isTokenExpired(): boolean {
+      if (!this.accessToken) return true
 
-  getters: {
-    isAuthenticated: (state) => !!state.accessToken,
+      const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
+      const exp = payload.exp * 1000
+      return Date.now() > exp
+    },
+    isAuthenticated(): boolean {
+      return !!this.accessToken && !this.isTokenExpired()
+    },
   },
 })
