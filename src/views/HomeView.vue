@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
 const input = ref('')
+const chatBox = ref<HTMLDivElement | null>(null)
 const messages = ref<{ sender: string; text: string }[]>([])
 const loading = ref(false)
 
 const sendMessage = async () => {
-  if (!input.value.trim()) return
+  if (!input.value.trim() || input.value.length > 100) return
 
   messages.value.push({ sender: 'user', text: input.value })
 
@@ -16,6 +17,8 @@ const sendMessage = async () => {
   input.value = ''
   loading.value = true
 
+  await nextTick()
+  scrollToBottom()
   try {
     const response = await axios.post(
       `${AI_API_URL}/ask`,
@@ -24,20 +27,29 @@ const sendMessage = async () => {
     )
 
     messages.value.push({ sender: 'bot', text: response.data })
+    await nextTick()
+    scrollToBottom()
   } catch (error) {
     console.error(error)
     messages.value.push({
       sender: 'bot',
       text: "Sorry, I couldn't process your request.",
     })
+    await nextTick()
+    scrollToBottom()
   } finally {
     loading.value = false
+  }
+}
+const scrollToBottom = () => {
+  if (chatBox.value) {
+    chatBox.value.scrollTop = chatBox.value.scrollHeight
   }
 }
 </script>
 <template>
   <section class="chat-container">
-    <div class="chat-box">
+    <div class="chat-box" ref="chatBox">
       <div v-for="(message, index) in messages" :key="index" class="message">
         <div :class="['bubble', message.sender === 'user' ? 'user' : 'bot']">
           {{ message.text }}
@@ -45,18 +57,19 @@ const sendMessage = async () => {
       </div>
     </div>
     <form class="input-container" @submit.prevent="sendMessage">
-      <input
+      <textarea
         v-model="input"
-        type="text"
         placeholder="Type your message..."
-        class="chat-input"
+        class="chat-textarea"
         required
         :disabled="loading"
-      />
+        maxlength="100"
+      ></textarea>
       <button type="submit" class="send-button" :disabled="loading">
         {{ loading ? 'Sending...' : 'Send' }}
       </button>
     </form>
+    <p class="char-counter">{{ input.length }}/100 characters</p>
   </section>
 </template>
 
@@ -71,12 +84,34 @@ const sendMessage = async () => {
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background-color: #f9f9f9;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-/* Caja de mensajes */
+.chat-textarea {
+  flex-grow: 1;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 1rem;
+  resize: none;
+  height: 50px;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+.chat-textarea:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.char-counter {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
 .chat-box {
   flex-grow: 1;
   overflow-y: auto;
@@ -85,9 +120,9 @@ const sendMessage = async () => {
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
+  scroll-behavior: smooth;
 }
 
-/* Estilo de los mensajes */
 .message {
   margin-bottom: 1rem;
 }
@@ -111,7 +146,6 @@ const sendMessage = async () => {
   align-self: flex-start;
 }
 
-/* Contenedor del input */
 .input-container {
   display: flex;
   gap: 0.5rem;
@@ -155,7 +189,6 @@ const sendMessage = async () => {
   cursor: not-allowed;
 }
 
-/* Diseño Responsivo */
 @media (max-width: 768px) {
   .chat-container {
     height: 90vh;

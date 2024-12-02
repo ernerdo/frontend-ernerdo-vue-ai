@@ -9,11 +9,12 @@ const logOut = () => {
   router.push('/login')
 }
 </script>
+
 <template>
   <div class="parent">
-    <header class="main-header">
+    <header class="main-header" v-if="authStore.isAuthenticated()">
       <nav>
-        <button v-if="authStore.isAuthenticated()" @click="logOut">Logout</button>
+        <button @click="logOut">Logout</button>
       </nav>
     </header>
     <main class="main-content">
@@ -29,6 +30,7 @@ const logOut = () => {
   grid-template-columns: 100%;
   grid-template-rows: 50px 1fr;
   height: 100vh;
+  background-color: #f8f9fa;
 }
 .main-header {
   grid-area: header;
