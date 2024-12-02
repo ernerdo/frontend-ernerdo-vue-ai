@@ -41,6 +41,7 @@ const handleLogin = async () => {
             v-model="form.email"
             placeholder="Enter your email"
             required
+            :disabled="loading"
           />
         </div>
         <div class="field">
@@ -51,9 +52,10 @@ const handleLogin = async () => {
             v-model="form.password"
             placeholder="Enter your password"
             required
+            :disabled="loading"
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" :disabled="loading">{{ loading ? 'loading' : 'login' }}</button>
       </form>
     </div>
   </div>
@@ -65,7 +67,6 @@ const handleLogin = async () => {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-color: #f8f9fa;
   padding: 1rem;
 }
 
