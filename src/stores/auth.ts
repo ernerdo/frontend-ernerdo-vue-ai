@@ -49,5 +49,8 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated(): boolean {
       return !!this.accessToken && !this.isTokenExpired()
     },
+    updateCredits(credits:number){
+      this.user = {...this.user, credits: credits}
+    }
   },
 })

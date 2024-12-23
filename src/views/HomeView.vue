@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { nextTick, ref } from 'vue';
+import { useAuthStore } from '../stores/auth'
 const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
 const input = ref('')
+const authStore = useAuthStore()
 const chatBox = ref<HTMLDivElement | null>(null)
 const messages = ref<{ sender: string; text: string }[]>([])
 const loading = ref(false)
@@ -26,7 +28,8 @@ const sendMessage = async () => {
       { headers: { 'Content-Type': 'application/json' } },
     )
 
-    messages.value.push({ sender: 'bot', text: response.data })
+    messages.value.push({ sender: 'bot', text: response.data.message })
+    authStore.updateCredits(response.data.credits)
     await nextTick()
     scrollToBottom()
   } catch (error) {
