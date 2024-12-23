@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import axios from 'axios'
-import { ref, nextTick } from 'vue'
+import axios from 'axios';
+import { nextTick, ref } from 'vue';
+import { useAuthStore } from '../stores/auth'
 const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
 const input = ref('')
+const authStore = useAuthStore()
 const chatBox = ref<HTMLDivElement | null>(null)
 const messages = ref<{ sender: string; text: string }[]>([])
 const loading = ref(false)
@@ -26,7 +28,8 @@ const sendMessage = async () => {
       { headers: { 'Content-Type': 'application/json' } },
     )
 
-    messages.value.push({ sender: 'bot', text: response.data })
+    messages.value.push({ sender: 'bot', text: response.data.message })
+    authStore.updateCredits(response.data.credits)
     await nextTick()
     scrollToBottom()
   } catch (error) {
@@ -48,160 +51,57 @@ const scrollToBottom = () => {
 }
 </script>
 <template>
-  <section class="chat-container">
-    <div class="chat-box" ref="chatBox">
-      <div v-for="(message, index) in messages" :key="index" class="message">
-        <div :class="['bubble', message.sender === 'user' ? 'user' : 'bot']">
+  <section class="flex flex-col justify-between h-1/2 max-w-xl mx-auto p-4 border border-gray-300 rounded-lg shadow-md overflow-hidden">
+    <div
+      class="h-[40vh] md:h-[60vh] overflow-y-auto p-4 mb-4 bg-white border border-gray-300 rounded-lg"
+      ref="chatBox"
+    >
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        :class="[
+          'mb-4 flex',
+          message.sender === 'user' ? 'flex-row-reverse' : 'justify-start',
+        ]"
+      >
+        <!-- Ícono -->
+        <div
+          class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white"
+          :class="message.sender === 'user' ? 'bg-blue-500' : 'bg-gray-300'"
+        >
+          <span v-if="message.sender === 'user'">😎</span>
+          <span v-else>🤖</span>
+        </div>
+        <!-- Burbuja de Mensaje -->
+        <div
+          :class="[
+            'px-4 py-2 rounded-lg max-w-3/4 break-words ml-2',
+            message.sender === 'user'
+              ? 'bg-blue-500 text-white self-end'
+              : 'bg-gray-100 text-gray-800 self-start'
+          ]"
+        >
           {{ message.text }}
         </div>
       </div>
     </div>
-    <form class="input-container" @submit.prevent="sendMessage">
+    <form class="flex gap-2" @submit.prevent="sendMessage">
       <textarea
         v-model="input"
         placeholder="Type your message..."
-        class="chat-textarea"
         required
         :disabled="loading"
         maxlength="100"
+        class="flex-grow p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring focus:ring-blue-200"
       ></textarea>
-      <button type="submit" class="send-button" :disabled="loading">
+      <button
+        type="submit"
+        :disabled="loading"
+        class="py-2 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+      >
         {{ loading ? 'Sending...' : 'Send' }}
       </button>
     </form>
-    <p class="char-counter">{{ input.length }}/100 characters</p>
+    <p class="text-right text-sm text-gray-600 mt-2">{{ input.length }}/100 characters</p>
   </section>
 </template>
-
-<style scoped>
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 50%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.chat-textarea {
-  flex-grow: 1;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  font-size: 1rem;
-  resize: none;
-  height: 50px;
-  background-color: #fff;
-  transition: background-color 0.3s ease;
-}
-.chat-textarea:disabled {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
-}
-
-.char-counter {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 0.5rem;
-  text-align: right;
-}
-
-.chat-box {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  scroll-behavior: smooth;
-}
-
-.message {
-  margin-bottom: 1rem;
-}
-
-.bubble {
-  padding: 0.8rem 1rem;
-  border-radius: 20px;
-  max-width: 75%;
-  word-wrap: break-word;
-}
-
-.user {
-  background-color: #007bff;
-  color: white;
-  align-self: flex-end;
-}
-
-.bot {
-  background-color: #f1f1f1;
-  color: #333;
-  align-self: flex-start;
-}
-
-.input-container {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.chat-input {
-  flex-grow: 1;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  outline: none;
-  font-size: 1rem;
-  background-color: #fff;
-  transition: background-color 0.3s ease;
-}
-
-.chat-input:disabled {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
-}
-
-.send-button {
-  padding: 0.8rem 1rem;
-  border: none;
-  border-radius: 20px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  font-size: 1rem;
-  transition:
-    background-color 0.3s ease,
-    transform 0.2s ease;
-}
-
-.send-button:hover {
-  background-color: #0056b3;
-}
-
-.send-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-  .chat-container {
-    height: 90vh;
-    padding: 0.5rem;
-  }
-
-  .chat-input {
-    font-size: 0.9rem;
-  }
-
-  .send-button {
-    font-size: 0.9rem;
-    padding: 0.7rem 1rem;
-  }
-}
-</style>
