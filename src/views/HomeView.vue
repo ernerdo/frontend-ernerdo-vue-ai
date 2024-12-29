@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import axios from 'axios';
-import { nextTick, ref } from 'vue';
+import axios from 'axios'
+import { nextTick, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
@@ -51,7 +51,9 @@ const scrollToBottom = () => {
 }
 </script>
 <template>
-  <section class="flex flex-col justify-between h-1/2 max-w-xl mx-auto p-4 border border-gray-300 rounded-lg shadow-md overflow-hidden">
+  <section
+    class="flex flex-col justify-between h-1/2 max-w-xl mx-auto p-4 border border-gray-300 rounded-lg shadow-md overflow-hidden"
+  >
     <div
       class="h-[40vh] md:h-[60vh] overflow-y-auto p-4 mb-4 bg-white border border-gray-300 rounded-lg"
       ref="chatBox"
@@ -59,10 +61,7 @@ const scrollToBottom = () => {
       <div
         v-for="(message, index) in messages"
         :key="index"
-        :class="[
-          'mb-4 flex',
-          message.sender === 'user' ? 'flex-row-reverse' : 'justify-start',
-        ]"
+        :class="['mb-4 flex', message.sender === 'user' ? 'flex-row-reverse' : 'justify-start']"
       >
         <!-- Ícono -->
         <div
@@ -78,30 +77,40 @@ const scrollToBottom = () => {
             'px-4 py-2 rounded-lg max-w-3/4 break-words ml-2',
             message.sender === 'user'
               ? 'bg-blue-500 text-white self-end'
-              : 'bg-gray-100 text-gray-800 self-start'
+              : 'bg-gray-100 text-gray-800 self-start',
           ]"
         >
           {{ message.text }}
         </div>
       </div>
     </div>
-    <form class="flex gap-2" @submit.prevent="sendMessage">
-      <textarea
-        v-model="input"
-        placeholder="Type your message..."
-        required
-        :disabled="loading"
-        maxlength="100"
-        class="flex-grow p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring focus:ring-blue-200"
-      ></textarea>
-      <button
-        type="submit"
-        :disabled="loading"
-        class="py-2 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-      >
-        {{ loading ? 'Sending...' : 'Send' }}
-      </button>
-    </form>
-    <p class="text-right text-sm text-gray-600 mt-2">{{ input.length }}/100 characters</p>
+    <div v-if="authStore.user.credits !== 0">
+      <form class="flex gap-2" @submit.prevent="sendMessage">
+        <textarea
+          v-model="input"
+          placeholder="Type your message..."
+          required
+          :disabled="loading"
+          maxlength="100"
+          class="flex-grow p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring focus:ring-blue-200"
+        ></textarea>
+        <button
+          type="submit"
+          :disabled="loading"
+          class="py-2 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+        >
+          {{ loading ? 'Sending...' : 'Send' }}
+        </button>
+      </form>
+      <div class="flex justify-between mt-4">
+        <p class="text-left text-sm text-gray-600 mt-2">{{ authStore?.user?.credits }} credits</p>
+        <p class="text-right text-sm text-gray-600 mt-2">{{ input.length }}/100 characters</p>
+      </div>
+    </div>
+    <div v-else>
+      <p class="text-center text-red-500">
+        You have no credits left. Please recharge your account or wait 24 hours to get more credits.
+      </p>
+    </div>
   </section>
 </template>
