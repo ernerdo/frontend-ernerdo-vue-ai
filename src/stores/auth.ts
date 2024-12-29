@@ -2,11 +2,17 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 export const AI_API_URL = import.meta.env.VITE_AI_API_URL
 
+interface User {
+  id: number
+  name: string
+  credits: number
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: null as string | null,
     refreshToken: null as string | null,
-    user: null as object | null,
+    user: { id: 0, name: '', credits: 0 } as User,
   }),
 
   actions: {
@@ -36,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.accessToken = null
       this.refreshToken = null
-      this.user = null
+      this.user = { id: 0, name: '', credits: 0 }
       delete axios.defaults.headers.common['Authorization']
     },
     isTokenExpired(): boolean {
@@ -49,8 +55,8 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated(): boolean {
       return !!this.accessToken && !this.isTokenExpired()
     },
-    updateCredits(credits:number){
-      this.user = {...this.user, credits: credits}
-    }
+    updateCredits(credits: number) {
+      this.user = { ...this.user, credits: credits }
+    },
   },
 })
